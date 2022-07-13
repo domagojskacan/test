@@ -5,11 +5,9 @@ import (
 	"fmt"
 )
 
-func parse(x string) map[string]interface{} {
+func parse(x string) (m map[string]interface{}) {
 
 	type mapa map[string]interface{}
-
-	var m mapa
 
 	err := json.Unmarshal([]byte(x), &m)
 	if err != nil {
