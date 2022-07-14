@@ -1,17 +1,17 @@
-package parse
+package parsing
 
 import (
 	"encoding/json"
 	"fmt"
 )
 
-func parse(x string) map[string]interface{} {
+func Parsel(jsonStr string) map[string]interface{} {
 
 	type mapa map[string]interface{}
 
 	var m mapa
 
-	err := json.Unmarshal([]byte(x), &m)
+	err := json.Unmarshal([]byte(jsonStr), &m)
 	if err != nil {
 		fmt.Println(err)
 	}
