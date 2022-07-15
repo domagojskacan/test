@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+
 	"log"
 	"os"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func SaveJson(username string, filename string, data map[string]interface{}) {
+func SaveJson(username string, filename string, data map[string]interface{}) error {
 	path := filepath.Join("../../test", username)
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(path, 0777)
@@ -26,13 +27,19 @@ func SaveJson(username string, filename string, data map[string]interface{}) {
 	}
 
 	path = filepath.Join("../../test", username, filename+".json")
-	err1 := ioutil.WriteFile(path, pod, 0644)
-	if err != nil {
-		log.Fatal(err1)
+
+	if _, err := os.Stat(path); err == nil {
+		return fmt.Errorf("file alredy exist")
+	} else {
+		err := ioutil.WriteFile(path, pod, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+	return nil
 }
 
-func SaveCsv(username string, filename string, data map[string]interface{}) {
+func SaveCsv(username string, filename string, data map[string]interface{}) error {
 
 	path := filepath.Join("../../test", username)
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
@@ -48,8 +55,6 @@ func SaveCsv(username string, filename string, data map[string]interface{}) {
 
 	for key, value := range data {
 
-		fmt.Println(key)
-		fmt.Println(value)
 		if len(keys) == 0 {
 			keys = key
 			values = fmt.Sprintf("%v", value)
@@ -60,18 +65,22 @@ func SaveCsv(username string, filename string, data map[string]interface{}) {
 	}
 
 	finalString := fmt.Sprintf("%s \n %s", keys, values)
-	fmt.Println(finalString)
 	path = filepath.Join("../../test", username, filename+".csv")
 
 	bs := []byte(finalString)
 
-	err := ioutil.WriteFile(path, bs, 0644)
-	if err != nil {
-		log.Fatal(err)
+	if _, err := os.Stat(path); err == nil {
+		return fmt.Errorf("file alredy exist")
+	} else {
+		err := ioutil.WriteFile(path, bs, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+	return nil
 }
 
-func SaveYaml(username string, filename string, data map[string]interface{}) {
+func SaveYaml(username string, filename string, data map[string]interface{}) error {
 	path := filepath.Join("../../test", username)
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(path, 0777)
@@ -86,20 +95,49 @@ func SaveYaml(username string, filename string, data map[string]interface{}) {
 		fmt.Println("error:", err)
 	}
 	path = filepath.Join("../../test", username, filename+".yaml")
-	err1 := ioutil.WriteFile(path, pod, 0644)
-	if err != nil {
-		log.Fatal(err1)
+	if _, err := os.Stat(path); err == nil {
+		return fmt.Errorf("file alredy exist")
+	} else {
+		err := ioutil.WriteFile(path, pod, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return nil
+}
+
+func ReadYaml(username string, filename string) (error, string) {
+	path := filepath.Join("../../test", username, filename+".csv")
+	if _, err := os.Stat(path); err == nil {
+		data, _ := ioutil.ReadFile(path)
+		s := string([]byte(data))
+		return nil, s
+	} else {
+		ret := "file does not exist"
+		return err, ret
 	}
 }
 
-func ReadYaml(username string, filename string) (string, error) {
-	return "", nil
+func ReadJson(username string, filename string) (error, string) {
+	path := filepath.Join("../../test", username, filename+".json")
+	if _, err := os.Stat(path); err == nil {
+		data, _ := ioutil.ReadFile(path)
+		s := string([]byte(data))
+		return nil, s
+	} else {
+		ret := "file does not exist"
+		return err, ret
+	}
 }
 
-func ReadJson(username string, filename string) (string, error) {
-	return "", nil
-}
-
-func ReadCsv(username string, filename string) (string, error) {
-	return "", nil
+func ReadCsv(username string, filename string) (error, string) {
+	path := filepath.Join("../../test", username, filename+".csv")
+	if _, err := os.Stat(path); err == nil {
+		data, _ := ioutil.ReadFile(path)
+		s := string([]byte(data))
+		return nil, s
+	} else {
+		ret := "file does not exist"
+		return err, ret
+	}
 }
