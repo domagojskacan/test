@@ -9,9 +9,7 @@ import (
 
 func ParseJson(jsonStr string) map[string]interface{} {
 
-	type mapa map[string]interface{}
-
-	var m mapa
+	m := make(map[string]interface{})
 
 	err := json.Unmarshal([]byte(jsonStr), &m)
 	if err != nil {

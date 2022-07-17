@@ -16,8 +16,6 @@ import (
 func main() {
 	router := gin.Default()
 
-	//x := `{"name": "Domagoj", "age" :19, "shoe_size": 44.5, "male": true}`
-	//fmt.Println(parsing.Parsel(x))
 	router.POST("/user/:username/:filename", func(c *gin.Context) {
 		name := c.Param("username")
 		action := c.Param("filename")
@@ -27,8 +25,8 @@ func main() {
 		case "application/json":
 			fmt.Println("case je appjson")
 			data, _ := ioutil.ReadAll(c.Request.Body)
-			s := string([]byte(data))
-			v := parsing.ParseJson(s)
+			str := string([]byte(data))
+			v := parsing.ParseJson(str)
 			err := fileio.SaveCsv(name, action, v)
 			if err != nil {
 				c.String(http.StatusNotAcceptable, "error")
@@ -79,25 +77,27 @@ func main() {
 			err := delete.DelJson(name, action)
 			if err != nil {
 				c.String(http.StatusNotFound, "error")
-			} else {
-				c.String(http.StatusOK, "file obrisan")
+				return
 			}
+			c.String(http.StatusOK, "file obrisan")
+
 		case "application/csv":
 
 			err := delete.DelCsv(name, action)
 			if err != nil {
 				c.String(http.StatusNotFound, "error")
-			} else {
-				c.String(http.StatusOK, "file obrisan")
+				return
 			}
+			c.String(http.StatusOK, "file obrisan")
+
 		case "application/yaml":
 
 			err := delete.DelYaml(name, action)
 			if err != nil {
 				c.String(http.StatusNotFound, "error")
-			} else {
-				c.String(http.StatusOK, "file obrisan")
+				return
 			}
+			c.String(http.StatusOK, "file obrisan")
 
 		}
 	})
