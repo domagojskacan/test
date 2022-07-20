@@ -1,13 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/csv"
 	"fmt"
 	"io/ioutil"
-	"net/http"
-
-	"context"
 	"log"
+	"net/http"
 
 	"os"
 	"os/signal"
@@ -22,15 +21,29 @@ import (
 
 func main() {
 	router := gin.Default()
+	//router.Run("localhost:9091")
+
 	srv := &http.Server{
 		Addr:    ":9091",
 		Handler: router,
 	}
+	type Credentials struct {
+		Password string `json:"password", db:"password"`
+		Username string `json:"username", db:"username"`
+	}
+
+	//if _, err := os.Stat("../../SQL"); errors.Is(err, os.ErrNotExist) {
+	//		err := os.Mkdir("../../SQL", 0777)
+	//		if err != nil {
+	//			fmt.Println("Database vec postoji")
+	//		}
+	//		os.Create("../../SQL/sql.db")
+	//	}
 
 	router.POST("/user/:username/:filename", func(c *gin.Context) {
 		name := c.Param("username")
 		action := c.Param("filename")
-		time.Sleep(60 * time.Second)
+
 		contentType := c.Request.Header[http.CanonicalHeaderKey(("Content-Type"))]
 
 		switch contentType[0] {
@@ -75,13 +88,15 @@ func main() {
 			}
 			fileio.SaveYaml(name, action, v)
 			fileio.SaveCsv(name, action, v)
+
 		}
+
 	})
 
 	router.DELETE("/user/:username/:filename", func(c *gin.Context) {
 		name := c.Param("username")
 		action := c.Param("filename")
-		time.Sleep(60 * time.Second)
+
 		contentType := c.Request.Header[http.CanonicalHeaderKey(("Content-Type"))]
 
 		switch contentType[0] {
@@ -113,12 +128,13 @@ func main() {
 			c.String(http.StatusOK, "file obrisan")
 
 		}
+
 	})
 
 	router.GET("/user/:username/:filename", func(c *gin.Context) {
 		name := c.Param("username")
 		action := c.Param("filename")
-		time.Sleep(60 * time.Second)
+
 		contentType := c.Request.Header[http.CanonicalHeaderKey(("Content-Type"))]
 
 		switch contentType[0] {
@@ -144,7 +160,6 @@ func main() {
 				c.String(http.StatusOK, data)
 			}
 		}
-
 	})
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -156,12 +171,15 @@ func main() {
 	<-quit
 	log.Println("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown: ", err)
 	}
-
+	select {
+	case <-ctx.Done():
+		log.Println("timeout of 3 seconds.")
+	}
 	log.Println("Server exiting")
-	router.Run("localhost:9091")
+
 }
