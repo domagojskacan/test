@@ -6,8 +6,15 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"../../pkg/delete"
+	"context"
+	"log"
 
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"../../pkg/delete"
 	"../../pkg/fileio"
 	"../../pkg/parsing"
 	"github.com/gin-gonic/gin"
@@ -15,10 +22,15 @@ import (
 
 func main() {
 	router := gin.Default()
+	srv := &http.Server{
+		Addr:    ":9091",
+		Handler: router,
+	}
 
 	router.POST("/user/:username/:filename", func(c *gin.Context) {
 		name := c.Param("username")
 		action := c.Param("filename")
+		time.Sleep(60 * time.Second)
 		contentType := c.Request.Header[http.CanonicalHeaderKey(("Content-Type"))]
 
 		switch contentType[0] {
@@ -69,6 +81,7 @@ func main() {
 	router.DELETE("/user/:username/:filename", func(c *gin.Context) {
 		name := c.Param("username")
 		action := c.Param("filename")
+		time.Sleep(60 * time.Second)
 		contentType := c.Request.Header[http.CanonicalHeaderKey(("Content-Type"))]
 
 		switch contentType[0] {
@@ -105,6 +118,7 @@ func main() {
 	router.GET("/user/:username/:filename", func(c *gin.Context) {
 		name := c.Param("username")
 		action := c.Param("filename")
+		time.Sleep(60 * time.Second)
 		contentType := c.Request.Header[http.CanonicalHeaderKey(("Content-Type"))]
 
 		switch contentType[0] {
@@ -132,5 +146,22 @@ func main() {
 		}
 
 	})
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown: ", err)
+	}
+
+	log.Println("Server exiting")
 	router.Run("localhost:9091")
 }
