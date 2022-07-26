@@ -27,18 +27,6 @@ func main() {
 		Addr:    ":9091",
 		Handler: router,
 	}
-	type Credentials struct {
-		Password string `json:"password", db:"password"`
-		Username string `json:"username", db:"username"`
-	}
-
-	//if _, err := os.Stat("../../SQL"); errors.Is(err, os.ErrNotExist) {
-	//		err := os.Mkdir("../../SQL", 0777)
-	//		if err != nil {
-	//			fmt.Println("Database vec postoji")
-	//		}
-	//		os.Create("../../SQL/sql.db")
-	//	}
 
 	router.POST("/user/:username/:filename", func(c *gin.Context) {
 		name := c.Param("username")

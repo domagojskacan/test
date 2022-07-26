@@ -17,6 +17,14 @@
             "request": "launch",
             "mode": "auto",
             "program": "pkg/parsing/parsing_test.go"
+        },
+
+        {
+            "name": "task2",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "testhtml/main.go"
         }
     ]
 }
